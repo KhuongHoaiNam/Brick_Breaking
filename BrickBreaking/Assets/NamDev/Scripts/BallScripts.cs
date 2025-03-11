@@ -5,7 +5,7 @@ using UnityEngine;
 namespace NamDev.BrickBreak
 {
     public class BallScripts : MonoBehaviour
-    {/*
+    {
         [Header("Settings")]
         [SerializeField] private float initialSpeed = 5f;
         [SerializeField] private float minVerticalSpeed = 0.5f;
@@ -77,6 +77,7 @@ namespace NamDev.BrickBreak
                 Gizmos.color = Color.red;
                 Gizmos.DrawRay(transform.position, rb.velocity.normalized * 2f);
             }
-        }*/
+        }
+
     }
 }

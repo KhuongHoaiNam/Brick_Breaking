@@ -9,8 +9,6 @@ namespace NamDev.BrickBreak
         [SerializeField] float speed = 10f;
         [SerializeField] float screenEdge = 7f;
 
-        private Rigidbody2D m_rb;
-
         void Update()
         {
             float moveInput = Input.GetAxis("Horizontal");
