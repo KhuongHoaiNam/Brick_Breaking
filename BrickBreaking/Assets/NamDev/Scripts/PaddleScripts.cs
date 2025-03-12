@@ -27,7 +27,7 @@ namespace NamDev.BrickBreak
                 {
                     if (ball.CurrentSpeed > 3f && ball.IsMoving == true)
                     {
-                        ball.CurrentSpeed = 12f;
+                        ball.CurrentSpeed = 9f;
 
                     }
                     else

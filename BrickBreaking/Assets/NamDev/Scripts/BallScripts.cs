@@ -88,6 +88,11 @@ namespace NamDev.BrickBreak
             {
                 ResetBall();
             }
+            else if(collision.gameObject.CompareTag(GameTag.Brick.ToString()) && m_isMoving == true)
+            {
+                m_currentSpeed += 0.2f;
+                HandleWallCollision(collision);
+            }
         }
 
         public void ResetBall()
