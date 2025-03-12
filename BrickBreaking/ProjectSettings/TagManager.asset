@@ -8,6 +8,7 @@ TagManager:
   - Paddle
   - Brick
   - Wall
+  - Death
   layers:
   - Default
   - TransparentFX
@@ -15,11 +16,11 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ball
+  - Paddle
+  - Brick
+  - Wall
+  - Death
   - 
   - 
   - 

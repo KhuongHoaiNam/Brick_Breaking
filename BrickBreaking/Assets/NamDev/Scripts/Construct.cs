@@ -10,8 +10,17 @@ namespace NamDev.BrickBreak
         Paddle,
         Brick,
         Wall,
+        Death,
     }
 
+    public enum Layer
+    {
+        Ball,
+        Paddle,
+        Brick,
+        Wall,
+        Death,
+    }
 
   
 }
