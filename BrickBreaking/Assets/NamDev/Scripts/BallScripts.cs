@@ -5,10 +5,10 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace NamDev.BrickBreak
 {
-    public class BallScripts : MonoBehaviour
+    public class BallScripts : MonoBehaviour, IComponentChecking
     {
         [Header("Settings")]
-        [SerializeField] private float m_maxspeed = 5f;
+        [SerializeField] private float m_maxspeed = 7f;
         [SerializeField] private float m_minVerticalSpeed = 0.5f;
         [SerializeField] private float m_currentSpeed;
         [SerializeField] private bool m_isMoving;
@@ -17,7 +17,7 @@ namespace NamDev.BrickBreak
         [SerializeField] private Transform m_spawnerPosition;
         [SerializeField] private LayerMask m_wallLayer;
 
-        [SerializeField] private Rigidbody2D m_rb;
+        private Rigidbody2D m_rb;
         [SerializeField] private Vector2 m_lastVelocity;
         private Vector3 m_dir;
         [SerializeField] private GameObject m_arrowDir;
@@ -32,11 +32,28 @@ namespace NamDev.BrickBreak
 
         void Update()
         {
-            m_lastVelocity = m_rb.velocity; // Lưu lại vận tốc trước khi va chạm
+            if (IComponentNull()) return;
 
+            m_lastVelocity = m_rb.velocity; // Lưu lại vận tốc trước khi va chạm
+            InputController();
+            if (m_isMoving)
+            {
+                m_currentSpeed -= m_speedRate * Time.deltaTime;
+
+                if (m_isMoving == true && m_currentSpeed < 3f)
+                {
+                    ResetBall();
+                }
+            }
+        }
+        void InputController()
+        {
             if (Input.GetMouseButton(0))
             {
-                m_arrowDir.gameObject.SetActive(true);
+                if (m_isMoving == false)
+                {
+                    m_arrowDir.gameObject.SetActive(true);
+                }
 
                 Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 mousePosition.z = 0f;
@@ -52,7 +69,6 @@ namespace NamDev.BrickBreak
                 // Chuẩn hóa góc về khoảng [-180, 180]
                 angle = Mathf.Repeat(angle + 180f, 360f) - 180f;
 
-                // Giới hạn góc trong khoảng [-95°, 95°]
                 angle = Mathf.Clamp(angle, 5f, 180f);
 
                 // Áp dụng góc xoay
@@ -62,35 +78,30 @@ namespace NamDev.BrickBreak
             if (Input.GetMouseButtonUp(0) && m_isMoving == false)
             {
                 m_arrowDir.gameObject.SetActive(false);
-                LaunchBall(m_dir);
+                BallMoving(m_dir);
 
 
-            }
-            if (m_isMoving)
-            {
-                m_currentSpeed -= m_speedRate * Time.deltaTime;
-
-                if (m_isMoving == true && m_currentSpeed < 3f)
-                {
-                    ResetBall();
-                }
             }
         }
-
         void OnCollisionEnter2D(Collision2D collision)
         {
             // Kiểm tra va chạm với tường bằng Layer thay vì Tag
             if (collision.gameObject.CompareTag(GameTag.Paddle.ToString()) && m_isMoving == true)
             {
+                m_currentSpeed += 1f;
                 HandleWallCollision(collision);
             }
             else if (collision.gameObject.CompareTag(GameTag.Death.ToString()) && m_isMoving == true)
             {
                 ResetBall();
             }
-            else if(collision.gameObject.CompareTag(GameTag.Brick.ToString()) && m_isMoving == true)
+            else if (collision.gameObject.CompareTag(GameTag.Brick.ToString()) && m_isMoving == true)
             {
-                m_currentSpeed += 0.2f;
+                m_currentSpeed += 0.3f;
+                HandleWallCollision(collision);
+            }
+            else if (collision.gameObject.CompareTag(GameTag.Wall.ToString()))
+            {
                 HandleWallCollision(collision);
             }
         }
@@ -102,7 +113,7 @@ namespace NamDev.BrickBreak
             m_rb.velocity = Vector2.zero;
         }
 
-        private void LaunchBall(Vector3 dir)
+        private void BallMoving(Vector3 dir)
         {
             //  Vector2 randomDirection = new Vector2(Random.Range(-1f, 1f), 1f).normalized;
             m_currentSpeed = m_maxspeed;
@@ -118,7 +129,7 @@ namespace NamDev.BrickBreak
 
             // Tính hướng mới với Reflect và giữ nguyên tốc độ
             Vector2 reflectedDirection = Vector2.Reflect(m_lastVelocity.normalized, normal);// lấy ra hướng phản xạ cho quả bong
-            m_rb.velocity = reflectedDirection * m_currentSpeed;
+            m_rb.velocity = reflectedDirection.normalized * m_currentSpeed;
 
             // Đảm bảo không di chuyển hoàn toàn ngang
             PreventHorizontalTrajectory();
@@ -131,11 +142,9 @@ namespace NamDev.BrickBreak
             if (Mathf.Abs(currentVelocity.y) < m_minVerticalSpeed)
             {
                 // Thêm thành phần dọc ngẫu nhiên
-
                 float newY = Mathf.Sign(currentVelocity.y) * m_minVerticalSpeed;
-                float newX = currentVelocity.x + Random.Range(-0.2f, 0.2f);
-
-                m_rb.velocity = new Vector2(newX, newY).normalized * m_currentSpeed;
+                float newX = currentVelocity.x + Random.Range(-0.5f, 0.5f);
+                m_rb.velocity = new Vector2(newX, newY) * m_currentSpeed;
             }
         }
 
@@ -149,11 +158,18 @@ namespace NamDev.BrickBreak
                 Gizmos.color = Color.red;
                 Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Vector3 direction = mousePosition - this.transform.position;
-                //    direction = Vector3.Normalize(direction);
-                //LaunchBall(direction);
                 Gizmos.DrawRay(transform.position, direction.normalized * 2f);
             }
         }
 
+        public bool IComponentNull()
+        {
+            bool checking = m_rb == null || m_arrowDir == null;
+            if (checking)
+            {
+                Debug.LogError("Some component is NULL. Pls CHECK !!!!!");
+            }
+            return checking;
+        }
     }
 }

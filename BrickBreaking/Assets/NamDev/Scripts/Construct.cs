@@ -22,5 +22,11 @@ namespace NamDev.BrickBreak
         Death,
     }
 
-  
+    public enum GameState
+    {
+        Stating,
+        Playing,
+        GameOver,
+    }
+
 }
